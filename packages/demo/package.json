@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "node src/index.ts"
+    "dev": "esbuild index.html src/index.ts --bundle --watch --outdir=dist --serve=3000 --loader:.html=copy"
   },
   "dependencies": {
     "minireact": "workspace:*"

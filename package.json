@@ -5,6 +5,9 @@
   "private": true,
   "packageManager": "pnpm@10.22.0",
   "scripts": {
-    "demo:start": "pnpm --filter demo start"
+    "demo:dev": "pnpm --filter demo dev"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0"
   }
 }
