@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "name": "demo",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.ts"
+  },
+  "dependencies": {
+    "minireact": "workspace:*"
+  }
+}

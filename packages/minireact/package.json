@@ -1,0 +1,11 @@
+{
+  "$schema": "https://www.schemastore.org/package.json",
+  "name": "minireact",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    }
+  }
+}
