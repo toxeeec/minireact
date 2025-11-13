@@ -1,12 +1,12 @@
 export type Props = Record<string, unknown> & {
-  children?: ReactNode;
-};
+	children?: ReactNode
+}
 
-export type HTMLElementType = keyof HTMLElementTagNameMap;
+export type HTMLElementType = keyof HTMLElementTagNameMap
 
 export type ReactElement = {
-  type: HTMLElementType;
-  props: Props;
-};
+	type: HTMLElementType
+	props: Props
+}
 
-export type ReactNode = ReactElement | string;
+export type ReactNode = ReactElement | string

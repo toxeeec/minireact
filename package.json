@@ -1,13 +1,20 @@
 {
-  "$schema": "https://www.schemastore.org/package.json",
-  "name": "minireact",
-  "version": "0.0.0",
-  "private": true,
-  "packageManager": "pnpm@10.22.0",
-  "scripts": {
-    "demo:dev": "pnpm --filter demo dev"
-  },
-  "devDependencies": {
-    "esbuild": "^0.27.0"
-  }
+	"$schema": "https://www.schemastore.org/package.json",
+	"name": "minireact",
+	"version": "0.0.0",
+	"private": true,
+	"packageManager": "pnpm@10.22.0",
+	"scripts": {
+		"demo:dev": "pnpm --filter demo dev",
+		"prepare": "simple-git-hooks"
+	},
+	"simple-git-hooks": {
+		"pre-commit": "pnpm pretty-quick --staged"
+	},
+	"devDependencies": {
+		"esbuild": "^0.27.0",
+		"prettier": "^3.6.2",
+		"pretty-quick": "^4.2.2",
+		"simple-git-hooks": "^2.13.1"
+	}
 }
