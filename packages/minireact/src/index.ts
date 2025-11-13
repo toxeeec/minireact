@@ -1,13 +1,5 @@
-type Container = Element | Document | DocumentFragment;
-
-type FiberRoot = {
-  container: Container;
-};
-
-type ReactElement = {
-  type: string;
-  props: object;
-};
+import { Container, Fiber, FiberRoot, performUnitOfWork } from "./fiber";
+import { HTMLElementType, Props, ReactElement } from "./types";
 
 class ReactDOMRoot {
   #internalRoot: FiberRoot;
@@ -16,13 +8,29 @@ class ReactDOMRoot {
     this.#internalRoot = internalRoot;
   }
 
-  render(children: ReactElement) {}
+  render(children: ReactElement) {
+    const { current } = this.#internalRoot;
+    current.props = { children };
+    let workInProgress: Fiber | null = this.#internalRoot.current;
+    while (workInProgress) {
+      workInProgress = performUnitOfWork(workInProgress);
+    }
+  }
 }
 
 export function createRoot(container: Container): ReactDOMRoot {
-  return new ReactDOMRoot({ container });
+  const fiber: Fiber = {
+    tag: "HOST_ROOT",
+    props: null,
+    stateNode: null as unknown as FiberRoot,
+    parent: null,
+    child: null,
+  };
+  const fiberRoot: FiberRoot = { container, current: fiber };
+  fiber.stateNode = fiberRoot;
+  return new ReactDOMRoot(fiberRoot);
 }
 
-export function jsx(type: string, props: object): ReactElement {
+export function jsx(type: HTMLElementType, props: Props): ReactElement {
   return { type, props };
 }
