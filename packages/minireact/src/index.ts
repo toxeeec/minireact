@@ -1,4 +1,4 @@
-import { Container, Fiber, FiberRoot, performUnitOfWork } from "./fiber"
+import { commitRoot, Container, Fiber, FiberRoot, performUnitOfWork } from "./fiber"
 import { HTMLElementType, Props, ReactElement } from "./types"
 
 class ReactDOMRoot {
@@ -15,6 +15,7 @@ class ReactDOMRoot {
 		while (workInProgress) {
 			workInProgress = performUnitOfWork(workInProgress)
 		}
+		commitRoot(this.#internalRoot)
 	}
 }
 
