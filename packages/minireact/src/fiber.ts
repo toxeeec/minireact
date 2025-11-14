@@ -1,4 +1,4 @@
-import { HTMLElementType, Props, ReactElement, ReactNode } from "./types"
+import { HostComponentProps, HTMLElementType, Props, ReactElement, ReactNode } from "./types"
 
 export type Container = Element | Document | DocumentFragment
 
@@ -12,7 +12,7 @@ export type Fiber = (
 	| {
 			tag: "HOST_COMPONENT"
 			type: HTMLElementType
-			props: Props
+			props: HostComponentProps
 			stateNode: Element | null
 	  }
 	| { tag: "HOST_TEXT"; props: string; stateNode: Text | null }
@@ -135,13 +135,15 @@ function appendAllChildren(parent: Element, fiber: Fiber) {
 	}
 }
 
-function createInstance(type: HTMLElementType, props: object) {
+function createInstance(type: HTMLElementType, props: HostComponentProps) {
 	const el = document.createElement(type)
-	Object.entries(props)
-		.filter(([key]) => key !== "children")
-		.forEach(([key, value]) => {
-			el[key] = value
-		})
+
+	for (const [key, value] of Object.entries(props)) {
+		if (key === "children") continue
+		if (key.startsWith("on")) {
+			el.addEventListener(key.substring(2).toLowerCase(), (e) => (value as EventListener)(e))
+		}
+	}
 	return el
 }
 

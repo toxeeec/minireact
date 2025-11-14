@@ -1,5 +1,5 @@
 import { commitRoot, Container, Fiber, FiberRoot, performUnitOfWork } from "./fiber"
-import { HTMLElementType, Props, ReactElement, ReactNode } from "./types"
+import { HostComponentProps, HTMLElementType, ReactElement, ReactNode } from "./types"
 
 class ReactDOMRoot {
 	#internalRoot: FiberRoot
@@ -33,6 +33,9 @@ export function createRoot(container: Container): ReactDOMRoot {
 	return new ReactDOMRoot(fiberRoot)
 }
 
-export function jsx(type: HTMLElementType, props: Props): ReactElement {
-	return { type, props }
+export function jsx<TElementType extends HTMLElementType>(
+	type: TElementType,
+	props: HostComponentProps<HTMLElementTagNameMap[TElementType]>,
+): ReactElement {
+	return { type, props: props as HostComponentProps }
 }

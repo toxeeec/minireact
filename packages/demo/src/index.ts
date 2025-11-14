@@ -11,6 +11,11 @@ createRoot(document.getElementById("root")!).render(
 					jsx("p", { children: "Child two" }),
 				],
 			}),
+			jsx("button", {
+				children: "Button",
+				onClick: () => console.log("click"),
+			}),
+			jsx("input", { onInput: (e) => console.log(e.currentTarget.value) }),
 		],
 	}),
 )
