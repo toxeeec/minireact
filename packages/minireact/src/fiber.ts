@@ -57,23 +57,24 @@ function reconcileChildren(fiber: Fiber, children: ReactNode | undefined) {
 	if (Array.isArray(children)) {
 		let firstChild: Fiber | null = null
 		let prevChild: Fiber | null = null
-		children.forEach((child) => {
+		for (const child of children) {
+			if (child == null || typeof child === "boolean" || child === "") continue
 			if (Array.isArray(child)) throw new Error("nested arrays are not supported yet")
 			const childFiber =
 				typeof child === "object"
 					? createFiberFromElement(child)
-					: createFiberFromText(child)
+					: createFiberFromText(String(child))
 			if (!firstChild) firstChild = childFiber
 			if (prevChild) prevChild.sibling = childFiber
 			prevChild = childFiber
 			childFiber.parent = fiber
-		})
+		}
 		fiber.child = firstChild
 	} else if (typeof children === "object") {
 		fiber.child = createFiberFromElement(children)
 		fiber.child.parent = fiber
 	} else {
-		fiber.child = createFiberFromText(children)
+		fiber.child = createFiberFromText(String(children))
 		fiber.child.parent = fiber
 	}
 }

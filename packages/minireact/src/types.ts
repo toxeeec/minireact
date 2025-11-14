@@ -1,4 +1,12 @@
-export type ReactNode = ReactElement | string | Array<ReactNode>
+export type ReactNode =
+	| ReactElement
+	| Array<ReactNode>
+	| boolean
+	| number
+	| bigint
+	| string
+	| null
+	| undefined
 
 export type Props = Record<string, unknown> & {
 	children?: ReactNode
