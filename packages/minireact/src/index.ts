@@ -1,5 +1,5 @@
 import { commitRoot, Container, Fiber, FiberRoot, performUnitOfWork } from "./fiber"
-import { HTMLElementType, Props, ReactElement } from "./types"
+import { HTMLElementType, Props, ReactElement, ReactNode } from "./types"
 
 class ReactDOMRoot {
 	#internalRoot: FiberRoot
@@ -8,7 +8,7 @@ class ReactDOMRoot {
 		this.#internalRoot = internalRoot
 	}
 
-	render(children: ReactElement) {
+	render(children: ReactNode) {
 		const { current } = this.#internalRoot
 		current.props = { children }
 		let workInProgress: Fiber | null = this.#internalRoot.current
@@ -26,6 +26,7 @@ export function createRoot(container: Container): ReactDOMRoot {
 		stateNode: null as unknown as FiberRoot,
 		parent: null,
 		child: null,
+		sibling: null,
 	}
 	const fiberRoot: FiberRoot = { container, current: fiber }
 	fiber.stateNode = fiberRoot

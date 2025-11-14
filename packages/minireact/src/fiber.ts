@@ -1,4 +1,4 @@
-import { HTMLElementType, Props, ReactNode } from "./types"
+import { HTMLElementType, Props, ReactElement, ReactNode } from "./types"
 
 export type Container = Element | Document | DocumentFragment
 
@@ -16,7 +16,7 @@ export type Fiber = (
 			stateNode: Element | null
 	  }
 	| { tag: "HOST_TEXT"; props: string; stateNode: Text | null }
-) & { parent: Fiber | null; child: Fiber | null }
+) & { parent: Fiber | null; child: Fiber | null; sibling: Fiber | null }
 
 export function performUnitOfWork(unitOfWork: Fiber): Fiber | null {
 	switch (unitOfWork.tag) {
@@ -37,6 +37,7 @@ export function performUnitOfWork(unitOfWork: Fiber): Fiber | null {
 	let nextUnitOfWork: Fiber | null = unitOfWork
 	while (nextUnitOfWork) {
 		completeUnitOfWork(nextUnitOfWork)
+		if (nextUnitOfWork.sibling) return nextUnitOfWork.sibling
 		nextUnitOfWork = nextUnitOfWork.parent
 	}
 	return nextUnitOfWork
@@ -53,23 +54,50 @@ export function commitRoot(root: FiberRoot) {
 function reconcileChildren(fiber: Fiber, children: ReactNode | undefined) {
 	if (!children) return
 
-	if (typeof children === "string") {
-		fiber.child = {
-			tag: "HOST_TEXT",
-			props: children,
-			stateNode: null,
-			parent: fiber,
-			child: null,
-		}
+	if (Array.isArray(children)) {
+		let firstChild: Fiber | null = null
+		let prevChild: Fiber | null = null
+		children.forEach((child) => {
+			if (Array.isArray(child)) throw new Error("nested arrays are not supported yet")
+			const childFiber =
+				typeof child === "object"
+					? createFiberFromElement(child)
+					: createFiberFromText(child)
+			if (!firstChild) firstChild = childFiber
+			if (prevChild) prevChild.sibling = childFiber
+			prevChild = childFiber
+			childFiber.parent = fiber
+		})
+		fiber.child = firstChild
+	} else if (typeof children === "object") {
+		fiber.child = createFiberFromElement(children)
+		fiber.child.parent = fiber
 	} else {
-		fiber.child = {
-			tag: "HOST_COMPONENT",
-			type: children.type,
-			props: children.props,
-			stateNode: null,
-			parent: fiber,
-			child: null,
-		}
+		fiber.child = createFiberFromText(children)
+		fiber.child.parent = fiber
+	}
+}
+
+function createFiberFromElement(element: ReactElement): Fiber {
+	return {
+		tag: "HOST_COMPONENT",
+		type: element.type,
+		props: element.props,
+		stateNode: null,
+		parent: null,
+		child: null,
+		sibling: null,
+	}
+}
+
+function createFiberFromText(text: string): Fiber {
+	return {
+		tag: "HOST_TEXT",
+		props: text,
+		stateNode: null,
+		parent: null,
+		child: null,
+		sibling: null,
 	}
 }
 
@@ -94,14 +122,15 @@ function completeUnitOfWork(unitOfWork: Fiber) {
 }
 
 function appendAllChildren(parent: Element, fiber: Fiber) {
-	const node = fiber.child
-	if (!node) return
-
-	if (!node.stateNode) throw new Error("node.stateNode is null")
-	if (node.tag === "HOST_COMPONENT" || node.tag == "HOST_TEXT") {
-		parent.appendChild(node.stateNode)
-	} else {
-		throw new Error(`unexpected tag: ${node.tag}`)
+	let node = fiber.child
+	while (node) {
+		if (!node.stateNode) throw new Error("node.stateNode is null")
+		if (node.tag === "HOST_COMPONENT" || node.tag == "HOST_TEXT") {
+			parent.appendChild(node.stateNode)
+		} else {
+			throw new Error(`unexpected tag: ${node.tag}`)
+		}
+		node = node.sibling
 	}
 }
 
