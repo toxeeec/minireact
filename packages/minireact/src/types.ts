@@ -18,10 +18,15 @@ export interface HostComponentProps<TElement extends HTMLElement = HTMLElement>
 
 export type HTMLElementType = keyof HTMLElementTagNameMap
 
-export type ReactElement = {
-	type: HTMLElementType
-	props: HostComponentProps
-}
+export type ReactElement =
+	| {
+			type: HTMLElementType
+			props: HostComponentProps
+	  }
+	| {
+			type: (props: object) => ReactNode
+			props: object
+	  }
 
 type Head<T extends string> = T extends `${infer Head}${string}` ? Head : never
 type Tail<T extends string> = T extends `${string}${infer Tail}` ? Tail : never

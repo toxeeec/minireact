@@ -16,6 +16,12 @@ export type Fiber = (
 			stateNode: Element | null
 	  }
 	| { tag: "HOST_TEXT"; props: string; stateNode: Text | null }
+	| {
+			tag: "FUNCTION_COMPONENT"
+			type: (props: Props) => ReactNode
+			props: Props
+			stateNode: null
+	  }
 ) & { parent: Fiber | null; child: Fiber | null; sibling: Fiber | null }
 
 export function performUnitOfWork(unitOfWork: Fiber): Fiber | null {
@@ -29,6 +35,11 @@ export function performUnitOfWork(unitOfWork: Fiber): Fiber | null {
 		case "HOST_TEXT": {
 			break
 		}
+		case "FUNCTION_COMPONENT":
+			const children = unitOfWork.type(unitOfWork.props)
+			reconcileChildren(unitOfWork, children)
+			break
+
 		default:
 			return unitOfWork satisfies never
 	}
@@ -80,8 +91,19 @@ function reconcileChildren(fiber: Fiber, children: ReactNode | undefined) {
 }
 
 function createFiberFromElement(element: ReactElement): Fiber {
+	if (typeof element.type === "string") {
+		return {
+			tag: "HOST_COMPONENT",
+			type: element.type,
+			props: element.props,
+			stateNode: null,
+			parent: null,
+			child: null,
+			sibling: null,
+		}
+	}
 	return {
-		tag: "HOST_COMPONENT",
+		tag: "FUNCTION_COMPONENT",
 		type: element.type,
 		props: element.props,
 		stateNode: null,
@@ -117,6 +139,8 @@ function completeUnitOfWork(unitOfWork: Fiber) {
 				unitOfWork.stateNode = createTextInstance(unitOfWork.props)
 			}
 			break
+		case "FUNCTION_COMPONENT":
+			break
 		default:
 			return unitOfWork satisfies never
 	}
@@ -125,11 +149,12 @@ function completeUnitOfWork(unitOfWork: Fiber) {
 function appendAllChildren(parent: Element, fiber: Fiber) {
 	let node = fiber.child
 	while (node) {
-		if (!node.stateNode) throw new Error("node.stateNode is null")
 		if (node.tag === "HOST_COMPONENT" || node.tag == "HOST_TEXT") {
+			if (!node.stateNode) throw new Error("node.stateNode is null")
 			parent.appendChild(node.stateNode)
-		} else {
-			throw new Error(`unexpected tag: ${node.tag}`)
+		} else if (node.child) {
+			node = node.child
+			continue
 		}
 		node = node.sibling
 	}
